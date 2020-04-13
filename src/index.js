@@ -1,43 +1,58 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 import App from "./components/App";
+import Login from "./components/Auth/Login";
+import Register from "./components/Auth/Register";
+import Spinner from "./Spinner";
 import * as serviceWorker from "./serviceWorker";
-
-//firebase import
 import firebase from "./firebase";
 
-//imports for routing
 import { BrowserRouter, Switch, Route, withRouter } from "react-router-dom";
-import Register from "./components/Auth/Register";
-import Login from "./components/Auth/Login";
+
+import { createStore } from "redux";
+import { Provider, connect } from "react-redux";
+import { composeWithDevTools } from "redux-devtools-extension";
+import rootReducer from "./reducers";
+import { setUser } from "./actions";
+
+const store = createStore(rootReducer, composeWithDevTools());
 
 class Root extends React.Component {
   componentDidMount() {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        //console.log(user);
+        // console.log(user);
+        this.props.setUser(user);
         this.props.history.push("/");
       }
     });
   }
+
   render() {
-    return (
+    return this.props.isLoading ? (
+      <Spinner />
+    ) : (
       <Switch>
         <Route exact path="/" component={App} />
-        <Route exact path="/login" component={Login} />
-        <Route exact path="/register" component={Register} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
       </Switch>
     );
   }
 }
 
-const RootWithAuth = withRouter(Root);
+const mapStateFromProps = (state) => ({
+  isLoading: state.user.isLoading,
+});
+
+const RootWithAuth = withRouter(connect(mapStateFromProps, { setUser })(Root));
 
 ReactDOM.render(
-  <BrowserRouter>
-    <RootWithAuth />
-  </BrowserRouter>,
+  <Provider store={store}>
+    <BrowserRouter>
+      <RootWithAuth />
+    </BrowserRouter>
+  </Provider>,
   document.getElementById("root")
 );
 
