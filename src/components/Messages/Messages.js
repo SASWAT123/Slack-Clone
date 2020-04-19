@@ -12,7 +12,7 @@ class Messages extends React.Component {
     messages: [],
     messagesLoading: true,
     channel: this.props.currentChannel,
-    user: this.props.currentUser,
+    user: this.props.currentUser
   };
 
   componentDidMount() {
@@ -23,24 +23,24 @@ class Messages extends React.Component {
     }
   }
 
-  addListeners = (channelId) => {
+  addListeners = channelId => {
     this.addMessageListener(channelId);
   };
 
-  addMessageListener = (channelId) => {
+  addMessageListener = channelId => {
     let loadedMessages = [];
-    this.state.messagesRef.child(channelId).on("child_added", (snap) => {
+    this.state.messagesRef.child(channelId).on("child_added", snap => {
       loadedMessages.push(snap.val());
       this.setState({
         messages: loadedMessages,
-        messagesLoading: false,
+        messagesLoading: false
       });
     });
   };
 
-  displayMessages = (messages) =>
+  displayMessages = messages =>
     messages.length > 0 &&
-    messages.map((message) => (
+    messages.map(message => (
       <Message
         key={message.timestamp}
         message={message}
